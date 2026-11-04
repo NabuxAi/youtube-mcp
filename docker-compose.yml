@@ -1,0 +1,26 @@
+services:
+  mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_NAME=${APP_NAME:-X MCP by Nabux}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:8000}
+      - APP_SECRET_KEY=${APP_SECRET_KEY}
+      - X_CLIENT_ID=${X_CLIENT_ID}
+      - X_CLIENT_SECRET=${X_CLIENT_SECRET}
+      - X_REDIRECT_URI=${X_REDIRECT_URI:-http://localhost:8000/x/callback}
+      - X_AUTH_URL=${X_AUTH_URL:-https://x.com/i/oauth2/authorize}
+      - X_TOKEN_URL=${X_TOKEN_URL:-https://api.x.com/2/oauth2/token}
+      - X_API_BASE=${X_API_BASE:-https://api.x.com/2}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - DATA_DIR=/data
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8000
+    volumes:
+      - x-mcp-data:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+volumes:
+  x-mcp-data:

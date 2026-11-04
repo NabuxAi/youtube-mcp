@@ -1,0 +1,35 @@
+name: YouTube MCP CI
+on:
+  push:
+    branches: [feature/youtube-mcp-gateway]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Compile
+        run: python -m compileall -q app server.py
+      - name: Unit tests
+        env:
+          APP_SECRET_KEY: test-secret-that-is-long-enough-for-fernet-123456
+          PUBLIC_BASE_URL: http://localhost:8000
+          GOOGLE_CLIENT_ID: test-client
+          GOOGLE_CLIENT_SECRET: test-secret
+          INTERNAL_SERVICE_TOKEN: internal-test-token
+          DATA_DIR: /tmp/youtube-ci
+        run: pytest -q tests/test_youtube_gateway.py
+      - name: Runtime wiring smoke
+        env:
+          APP_SECRET_KEY: test-secret-that-is-long-enough-for-fernet-123456
+          PUBLIC_BASE_URL: http://localhost:8000
+          GOOGLE_CLIENT_ID: test-client
+          GOOGLE_CLIENT_SECRET: test-secret
+          INTERNAL_SERVICE_TOKEN: internal-test-token
+          DATA_DIR: /tmp/youtube-ci-runtime
+        run: python -c "import server; app=server.build_app(); assert app is not None"
